@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class BookBase(BaseModel):
     title: str = Field(..., min_length=1)
-    summary: str | None = None
+    summary: str = Field(..., min_length=1)
     publication_date: date | None = None
 
 
@@ -21,7 +21,7 @@ class BookOut(BookBase):
 
 class AuthorBase(BaseModel):
     name: str = Field(..., min_length=1)
-    bio: str | None = None
+    bio: str = Field(..., min_length=1)
 
 
 class AuthorCreate(AuthorBase):
@@ -32,4 +32,4 @@ class AuthorOut(AuthorBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    books: list[BookOut] = []
+    books: list[BookOut] = Field(default_factory=list)

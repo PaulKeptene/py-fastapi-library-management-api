@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+
 import models
 import schemas
 
@@ -21,8 +23,12 @@ def get_authors(db: Session, skip: int = 0, limit: int = 100):
 def create_author(db: Session, author: schemas.AuthorCreate):
     db_author = models.Author(name=author.name, bio=author.bio)
     db.add(db_author)
-    db.commit()
-    db.refresh(db_author)
+    try:
+        db.commit()
+        db.refresh(db_author)
+    except IntegrityError:
+        db.rollback()
+        raise
     return db_author
 
 
@@ -31,11 +37,15 @@ def create_book_for_author(db: Session, author_id: int, book: schemas.BookCreate
         title=book.title,
         summary=book.summary,
         publication_date=book.publication_date,
-        author_id=author_id
+        author_id=author_id,
     )
     db.add(db_book)
-    db.commit()
-    db.refresh(db_book)
+    try:
+        db.commit()
+        db.refresh(db_book)
+    except IntegrityError:
+        db.rollback()
+        raise
     return db_book
 
 
